@@ -1,0 +1,72 @@
+
+#include <SDL.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+void SDL_ExitError(const char *message)
+{
+    SDL_Log("ERREUR : %s > %s\n",message,SDL_GetError());
+    exit(EXIT_FAILURE);
+}
+
+int main(int argc,char **argv)
+{
+    SDL_Window *window=NULL;
+
+    window = SDL_CreateWindow("Premiere fenetre",SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,800,600,0);
+
+    if(window==NULL)
+    {
+        SDL_ExitError("creation de fenetre echoue");
+    }
+
+    SDL_Renderer *renderer=NULL;
+
+    renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_SOFTWARE);
+    if(renderer==NULL)
+    {
+        SDL_ExitError("creation rendu echoue");
+    }
+
+    SDL_Surface *image=NULL;
+    SDL_Texture *texture=NULL;
+    image = SDL_LoadBMP("imaget.bmp");
+    if(image==NULL)
+    {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_ExitError("Impossible de charger l'image");
+    }
+
+    texture = SDL_CreateTextureFromSurface(renderer,image);
+    SDL_FreeSurface(image);
+    if(texture==NULL)
+    {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_ExitError("Impossible de charger l'image");
+    }
+    SDL_Rect rect;
+    if(SDL_QueryTexture(texture,NULL,NULL,&rect.w,&rect.h)!=0)
+    {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_ExitError("Impossible de charge la texture");
+    }
+
+    rect.x=(800 - rect.w)/2;
+    rect.y=(600 - rect.h)/2;
+    if(SDL_RenderCopy(renderer,texture,NULL,&rect)!=0)
+    {
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_ExitError("Impossible d'afficher l'image");
+    }
+    
+    SDL_RenderPresent(renderer);
+    SDL_Delay(9000);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    return EXIT_FAILURE;
+}
